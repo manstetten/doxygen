@@ -28,8 +28,42 @@
 
 bool Htags::useHtags = FALSE;
 
+bool Htags::useUrlPrefix = FALSE;
+static QCString g_url_prefix;
+
 static Dir g_inputDir;
 static std::unordered_map<std::string,std::string> g_symbolMap;
+
+
+/*! prepare input 
+ *  \retval TRUE success
+ *  \retval FALSE an error has occurred.
+ */
+bool Htags::prepare_input(const QCString &prefix_url)
+{
+  const StringVector &inputSource = Config_getList(INPUT);
+  if (inputSource.empty())
+  {
+    g_inputDir.setPath(Dir::currentDirPath());
+  }
+  else if (inputSource.size()==1)
+  {
+    g_inputDir.setPath(inputSource.back());
+    if (!g_inputDir.exists())
+      err("Cannot find directory %s. "
+          "Check the value of the INPUT tag in the configuration file.\n",
+          inputSource.back().c_str()
+         );
+  }
+  else
+  {
+    err("If you use USE_HTAGS then INPUT should specify a single directory.\n");
+    return FALSE;
+  }
+
+  g_url_prefix = prefix_url;
+  return TRUE;
+}
 
 /*! constructs command line of htags(1) and executes it.
  *  \retval TRUE success
@@ -62,6 +96,7 @@ bool Htags::execute(const QCString &htmldir)
     err("If you use USE_HTAGS then INPUT should specify a single directory.\n");
     return FALSE;
   }
+
 
   /*
    * Construct command line for htags(1).
@@ -165,11 +200,16 @@ QCString Htags::path2URL(const QCString &path)
   }
   if (!symName.isEmpty())
   {
-    auto it = g_symbolMap.find(symName.str());
-    //printf("path2URL=%s symName=%s result=%p\n",qPrint(path),qPrint(symName),result);
-    if (it!=g_symbolMap.end())
+    if(!Htags::useUrlPrefix) 
     {
-      url = QCString("HTML/"+it->second);
+      auto it = g_symbolMap.find(symName.str());
+      //printf("path2URL=%s symName=%s result=%p\n",qPrint(path),qPrint(symName),result);
+      if (it!=g_symbolMap.end())
+      {
+        url = QCString("HTML/"+it->second);
+      }
+    } else {
+      url = QCString(g_url_prefix.str()+symName.str());
     }
   }
   return url;

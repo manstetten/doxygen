@@ -1819,6 +1819,14 @@ to disable this feature.
 ]]>
       </docs>
     </option>
+    <option type='string' id='USE_HTAGS_URL_PREFIX' format='string' defval='' depends='USE_HTAGS'>
+      <docs>
+<![CDATA[
+ If the \c USE_HTAGS tag is set to \c YES and \c USE_HTAGS_URL_PREFIX is not empty, 
+ bypass htags and prefix paths with this static url.
+]]>
+      </docs>
+    </option>
 
     <option type='bool' id='VERBATIM_HEADERS' defval='1'>
       <docs>

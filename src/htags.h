@@ -21,9 +21,11 @@ class QCString;
 struct Htags
 {
   static bool useHtags;
+  static bool useUrlPrefix;
   static bool loadFilemap(const QCString &htmldir);
   static QCString path2URL(const QCString &path);
   static bool execute(const QCString &htmldir);
+  static bool prepare_input(const QCString &prefix_url);  
 };
 
 #endif /* HTAGS_H */

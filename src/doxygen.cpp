@@ -12423,14 +12423,28 @@ void generateOutput()
     g_outputList->add<RTFGenerator>();
     RTFGenerator::init();
   }
+
   if (Config_getBool(USE_HTAGS))
   {
     Htags::useHtags = TRUE;
     QCString htmldir = Config_getString(HTML_OUTPUT);
-    if (!Htags::execute(htmldir))
-       err("USE_HTAGS is YES but htags(1) failed. \n");
-    else if (!Htags::loadFilemap(htmldir))
-       err("htags(1) ended normally but failed to load the filemap. \n");
+    QCString urlprefix = Config_getString(USE_HTAGS_URL_PREFIX);
+
+    if (!urlprefix.isEmpty()) 
+    {    
+      Htags::useUrlPrefix = TRUE;
+      msg("Setting useUrlPrefix = TRUE due to presence of USE_HTAGS_URL_PREFIX=%s\n",qPrint(urlprefix));
+      if (!Htags::prepare_input(urlprefix))
+        err("USE_HTAGS is YES and USE_HTAGS_URL_PREFIX is present but INPUT was not a single directory. \n");
+    }
+    else
+    {
+      if (!Htags::execute(htmldir))
+        err("USE_HTAGS is YES but htags(1) failed. \n");
+      else if (!Htags::loadFilemap(htmldir))
+        err("htags(1) ended normally but failed to load the filemap. \n");
+    }
+
   }
 
   /**************************************************************************
